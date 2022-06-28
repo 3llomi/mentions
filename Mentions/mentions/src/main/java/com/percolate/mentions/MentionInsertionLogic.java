@@ -1,11 +1,12 @@
 package com.percolate.mentions;
 
-import android.support.v4.content.ContextCompat;
 import android.text.InputType;
 import android.text.Spannable;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.widget.EditText;
+
+import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -25,7 +26,7 @@ class MentionInsertionLogic {
     private final EditText editText;
 
     /**
-     *  An internal array that keeps track of all the mentions added to {@link EditText}.
+     * An internal array that keeps track of all the mentions added to {@link EditText}.
      */
     private final List<Mentionable> mentions;
 
@@ -35,10 +36,14 @@ class MentionInsertionLogic {
     @SuppressWarnings("WeakerAccess")
     protected int textHighlightColor;
 
-    MentionInsertionLogic(final EditText editText) {
+    private String mentionCharacter;
+
+
+    MentionInsertionLogic(final EditText editText, String mentionCharacter) {
         this.editText = editText;
         this.mentions = new ArrayList<>();
         this.textHighlightColor = R.color.mentions_default_color;
+        this.mentionCharacter = mentionCharacter;
     }
 
     /**
@@ -82,14 +87,14 @@ class MentionInsertionLogic {
      *
      * @param mention Mentionable     A mention to display in {@link EditText}.
      */
-     void insertMention(final Mentionable mention) {
+    void insertMention(final Mentionable mention) {
         checkMentionable(mention);
         mention.setMentionLength(mention.getMentionName().length());
 
         final int cursorPosition = editText.getSelectionEnd();
         final String text = editText.getText().toString();
         final String toReplace = text.substring(0, cursorPosition);
-        final int start = toReplace.lastIndexOf("@");
+        final int start = toReplace.lastIndexOf(mentionCharacter);
 
         if (start != -1) {
             final int newCursorPosition = start + mention.getMentionName().length() + 1;
@@ -110,8 +115,9 @@ class MentionInsertionLogic {
     /**
      * Determine if the user is not inserting a null {@link Mentionable} and the
      * {@link Mentionable}'s name was set.
-     * @param mentionable   Mentionable     The {@link Mentionable} being inserted into the
-     *                                      {@link EditText}.
+     *
+     * @param mentionable Mentionable     The {@link Mentionable} being inserted into the
+     *                    {@link EditText}.
      */
     private void checkMentionable(final Mentionable mentionable) {
         if (mentionable == null) {
@@ -141,15 +147,15 @@ class MentionInsertionLogic {
      * all the mentions added to the {@link EditText} should be removed. This method checks this
      * case and remove all the added {@link Mentionable}s from <code>mentions</code>.
      *
-     * @param charSequence  CharSequence    The text that will be changed.
-     * @param start         int             The initial position in <code>charSequence</code> where
-     *                                      the text will be changed.
-     * @param count         int             The number of characters that will be changed in
-     *                                      <code>charSequence</code>.
-     * @param after         int             The length of the new text entered by the user.
+     * @param charSequence CharSequence    The text that will be changed.
+     * @param start        int             The initial position in <code>charSequence</code> where
+     *                     the text will be changed.
+     * @param count        int             The number of characters that will be changed in
+     *                     <code>charSequence</code>.
+     * @param after        int             The length of the new text entered by the user.
      */
     void checkIfProgrammaticallyClearedEditText(final CharSequence charSequence, final int start,
-            final int count, final int after) {
+                                                final int count, final int after) {
         if (StringUtils.isNotBlank(charSequence) && start == 0 && count == charSequence.length()
                 && after == 0) {
             mentions.clear();
@@ -166,7 +172,7 @@ class MentionInsertionLogic {
      * @param before int     Length of old text.
      * @param count  int     The number of characters in the new text.
      */
-     void updateInternalMentionsArray(final int start, final int before, final int count) {
+    void updateInternalMentionsArray(final int start, final int before, final int count) {
         if (!mentions.isEmpty()) {
             if (before != count) { // Text not changed if they ==.
                 for (Iterator<Mentionable> iterator = mentions.iterator(); iterator.hasNext(); ) {
@@ -223,7 +229,7 @@ class MentionInsertionLogic {
                     }
                 } catch (Exception ex) {
                     Log.e("Mentions", "Mention removed due to exception. + [" +
-                                                                mention.getMentionName() + "]", ex);
+                            mention.getMentionName() + "]", ex);
                     iterator.remove();
                 }
             }

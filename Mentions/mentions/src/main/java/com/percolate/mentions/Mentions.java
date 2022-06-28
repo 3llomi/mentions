@@ -49,17 +49,17 @@ public class Mentions {
 
     /**
      * Pass in your {@link EditText} to give it the ability to @ mention.
-
-     * @param context   Context     Although not used in the library, it passed for future use.
-     * @param editText  EditText    The EditText that will have @ mention capability.
+     *
+     * @param context  Context     Although not used in the library, it passed for future use.
+     * @param editText EditText    The EditText that will have @ mention capability.
      */
-    private Mentions(final Context context, final EditText editText) {
+    private Mentions(final Context context, final EditText editText, String mentionCharacter) {
         this.context = context;
         this.editText = editText;
 
         // instantiate helper classes
-        this.mentionCheckerLogic = new MentionCheckerLogic(editText);
-        this.mentionInsertionLogic = new MentionInsertionLogic(editText);
+        this.mentionCheckerLogic = new MentionCheckerLogic(editText, mentionCharacter);
+        this.mentionInsertionLogic = new MentionInsertionLogic(editText, mentionCharacter);
     }
 
     /**
@@ -77,25 +77,25 @@ public class Mentions {
          * Builder which allows you configure mentions. A {@link Context} and {@link EditText} is
          * required by the Builder.
          *
-         * @param context   Context     Context
-         * @param editText  EditText    The {@link EditText} view to which you want to add the
-         *                              ability to mention.
+         * @param context  Context     Context
+         * @param editText EditText    The {@link EditText} view to which you want to add the
+         *                 ability to mention.
          */
-        public Builder(final Context context, final EditText editText) {
+        public Builder(final Context context, final EditText editText, String mentionCharacter) {
             if (context == null) {
                 throw new IllegalArgumentException("Context must not be null.");
             } else if (editText == null) {
                 throw new IllegalArgumentException("EditText must not be null.");
             }
-            this.mentionsLib = new Mentions(context, editText);
+            this.mentionsLib = new Mentions(context, editText, mentionCharacter);
         }
 
         /**
          * The {@link EditText} may have some text and mentions already in it. This method is used
          * to pre-populate the existing {@link Mentionable}s and highlight them.
          *
-         * @param mentions  List<Mentionable>   An array of {@link Mentionable}s that are
-         *                                      currently in the {@link EditText}.
+         * @param mentions List<Mentionable>   An array of {@link Mentionable}s that are
+         *                 currently in the {@link EditText}.
          */
         public Builder addMentions(final List<? extends Mentionable> mentions) {
             mentionsLib.mentionInsertionLogic.addMentions(mentions);
@@ -105,7 +105,7 @@ public class Mentions {
         /**
          * Set a color to highlight the mentions' text. The default color is orange.
          *
-         * @param color     int     The color to use to highlight a {@link Mentionable}'s text.
+         * @param color int     The color to use to highlight a {@link Mentionable}'s text.
          */
         public Builder highlightColor(final int color) {
             mentionsLib.mentionInsertionLogic.setTextHighlightColor(color);
@@ -116,8 +116,8 @@ public class Mentions {
          * Set the maximum number of characters the user may have typed until the search text
          * is invalid.
          *
-         * @param maxCharacters     int     The number of characters within which anything typed
-         *                                  after the '@' symbol will be evaluated.
+         * @param maxCharacters int     The number of characters within which anything typed
+         *                      after the '@' symbol will be evaluated.
          */
         public Builder maxCharacters(final int maxCharacters) {
             mentionsLib.mentionCheckerLogic.setMaxCharacters(maxCharacters);
@@ -127,8 +127,8 @@ public class Mentions {
         /**
          * Set a listener that will provide you with a valid token.
          *
-         * @param queryListener     QueryListener   The listener to set to be notified of a valid
-         *                                          query.
+         * @param queryListener QueryListener   The listener to set to be notified of a valid
+         *                      query.
          */
         public Builder queryListener(final QueryListener queryListener) {
             mentionsLib.queryListener = queryListener;
@@ -139,8 +139,8 @@ public class Mentions {
          * Set a listener to notify you whether you should hide or display a drop down with
          * {@link Mentionable}s.
          *
-         * @param suggestionsListener   SuggestionsListener     The listener for display
-         *                                                      suggestions.
+         * @param suggestionsListener SuggestionsListener     The listener for display
+         *                            suggestions.
          */
         public Builder suggestionsListener(final SuggestionsListener suggestionsListener) {
             mentionsLib.suggestionsListener = suggestionsListener;
@@ -162,8 +162,8 @@ public class Mentions {
      * You may be pre-loading text with {@link Mentionable}s. In order to highlight and make those
      * {@link Mentionable}s recognizable by the library, you may add them by using this method.
      *
-     * @param mentionables  List<? extends Mentionable>  Any pre-existing mentions that you
-     *                                                   want to add to the library.
+     * @param mentionables List<? extends Mentionable>  Any pre-existing mentions that you
+     *                     want to add to the library.
      */
     public void addMentions(final List<? extends Mentionable> mentionables) {
         mentionInsertionLogic.addMentions(mentionables);
@@ -224,8 +224,8 @@ public class Mentions {
      * Insert a mention the user has chosen in the {@link EditText} and notify the user
      * to hide the suggestions list.
      *
-     * @param mentionable   Mentionable     A {@link Mentionable} chosen by the user to display
-     *                                      and highlight in the {@link EditText}.
+     * @param mentionable Mentionable     A {@link Mentionable} chosen by the user to display
+     *                    and highlight in the {@link EditText}.
      */
     public void insertMention(final Mentionable mentionable) {
         mentionInsertionLogic.insertMention(mentionable);
@@ -236,7 +236,7 @@ public class Mentions {
      * If the user typed a query that was valid then return it. Otherwise, notify you to close
      * a suggestions list.
      *
-     * @param query     String      A valid query.
+     * @param query String      A valid query.
      */
     public void queryReceived(final String query) {
         if (queryListener != null && StringUtils.isNotBlank(query)) {

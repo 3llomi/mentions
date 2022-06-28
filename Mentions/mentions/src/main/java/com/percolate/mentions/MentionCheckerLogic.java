@@ -12,10 +12,15 @@ class MentionCheckerLogic {
     /* Default limit of 13 characters to evaluate after the '@' symbol. */
     @SuppressWarnings("WeakerAccess")
     protected int maxCharacters = 13;
+    private String mentionCharacter;
 
-    MentionCheckerLogic(final EditText editText) {
+    MentionCheckerLogic(final EditText editText, String mentionCharacter) {
         this.editText = editText;
+        this.mentionCharacter = mentionCharacter;
     }
+
+
+
 
     /**
      * A user may type an '@' and keep typing words without choosing a mention. This method is used
@@ -28,7 +33,7 @@ class MentionCheckerLogic {
     void setMaxCharacters(final int maxCharacters) {
         if (maxCharacters <= 0) {
             throw new IllegalArgumentException("Maximum number of characters must be greater " +
-                                               "than 0.");
+                    "than 0.");
         }
         this.maxCharacters = maxCharacters;
     }
@@ -47,17 +52,17 @@ class MentionCheckerLogic {
         String queryToken = "";
 
         // perform a search if the {@link EditText} has an '@' symbol.
-        if (StringUtils.contains(editText.getText(), "@")) {
+        if (StringUtils.contains(editText.getText(), mentionCharacter)) {
             final int cursorPosition = editText.getSelectionStart();
             final String allTextBeforeCursor = editText.getText().toString().substring(0, cursorPosition);
-            final String providedSearchText = StringUtils.substringAfterLast(allTextBeforeCursor, "@");
+            final String providedSearchText = StringUtils.substringAfterLast(allTextBeforeCursor, mentionCharacter);
 
             // check search text is within <code>maxCharacters</code> and begins with a
             // alpha numeric char.
             if (searchIsWithinMaxChars(providedSearchText, maxCharacters)
                     && searchBeginsWithAlphaNumericChar(providedSearchText)) {
 
-                final int atSymbolPosition = StringUtils.lastIndexOf(allTextBeforeCursor, "@");
+                final int atSymbolPosition = StringUtils.lastIndexOf(allTextBeforeCursor, mentionCharacter);
 
                 // check if search text is first in the view or has a space beforehand if there are
                 // more characters in the view.
@@ -129,7 +134,7 @@ class MentionCheckerLogic {
             if (editText.length() >= start) {
                 String text = editText.getText().toString().substring(0, start);
                 text = StringUtils.substringAfterLast(text, " ");
-                if (StringUtils.startsWith(text, "@")) {
+                if (StringUtils.startsWith(text, mentionCharacter)) {
                     return true;
                 }
             }
